@@ -1,0 +1,31 @@
+DOM型跨站，来自用户输入的字符串通过JS生成HTML标签的方式被直接输出到客户端。
+<b>修复建议</b>
+使用跨站修复函数处理输出到客户端的数据字符串。
+<b>修复示例</b>
+如：
+<pre>
+	&lt;script type=&quot;text/javascript&quot;&gt; 
+		String queryString = Window.Location.getQueryString();
+		int pos = queryString.indexOf(&quot;eid=&quot;)+4;
+		HTML output = new HTML();
+		output.setHTML(queryString.substring(pos, queryString.length()));
+	&lt;/script&gt;
+</pre>
+修复为：
+<pre>
+	&lt;script type=&quot;text/javascript&quot;&gt; 
+	function xss_escape(str,reg){
+		returnstr ? str.replace(reg ||/[&amp;&lt;&quot;&gt;&#x27;](?:(amp|lt|quot|gt|#39|nbsp|#\d+);)?/g,function (a, b){
+			if(b){
+				return a;
+				}else{
+					return{ &#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;, &#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;, &#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;, &#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;, &quot;&#x27;&quot;:&#x27;&#x27;&#x27;, }[a]
+					}
+				}): &#x27;&#x27;;
+			}
+		String queryString = Window.Location.getQueryString();
+		int pos = queryString.indexOf(&quot;eid=&quot;)+4;
+		HTML output = new HTML();
+		output.setHTML(xss_escape (queryString.substring(pos, queryString.length())));
+	&lt;/script&gt;
+</pre>
